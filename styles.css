@@ -212,17 +212,21 @@ section { position: relative; padding-block: clamp(4.5rem, 9vw, 8rem); }
   position: absolute; inset: 0; z-index: -3;
   overflow: hidden;
 }
+/* Drone-style camera: the image is oversized (scale) and pans
+   left -> right in sync with the night sweep, like a single
+   continuous aerial shot. alternate = the "drone" flies back on
+   the next pass, so the loop never jumps. */
 .hero-img {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover;
-  transform-origin: 50% 40%;
-  animation: heroKenBurns 42s ease-in-out infinite alternate;
+  transform-origin: 50% 42%;
+  animation: heroDronePan 26s ease-in-out infinite alternate;
 }
 
-@keyframes heroKenBurns {
-  0%   { transform: scale(1.02) translate(0, 0); }
-  100% { transform: scale(1.13) translate(-1.2%, -1.5%); }
+@keyframes heroDronePan {
+  0%   { transform: scale(1.18) translate(2.8%, 0.4%); }
+  100% { transform: scale(1.24) translate(-2.8%, -0.6%); }
 }
 
 /* --- Night layer: only the SKY darkens; the mountain stays lit.
@@ -234,14 +238,16 @@ section { position: relative; padding-block: clamp(4.5rem, 9vw, 8rem); }
   position: absolute; inset: 0;
   pointer-events: none;
   opacity: 0;
-  animation: heroNightFade 34s ease-in-out infinite;
+  animation: heroNightFade 26s ease-in-out infinite;
 }
 
-/* Fallback when mask isn't supported: simple crossfade of the same layer */
+/* Fallback when mask isn't supported: simple crossfade of the same layer.
+   The sweep starts ~1.5s after load so first-time visitors see it
+   before they start scrolling. */
 @keyframes heroNightFade {
-  0%, 26%   { opacity: 0; }
-  40%, 72%  { opacity: 1; }
-  86%, 100% { opacity: 0; }
+  0%, 6%    { opacity: 0; }
+  28%, 55%  { opacity: 1; }
+  77%, 100% { opacity: 0; }
 }
 
 @supports ((mask-image: linear-gradient(#000, #000)) or (-webkit-mask-image: linear-gradient(#000, #000))) {
@@ -253,14 +259,14 @@ section { position: relative; padding-block: clamp(4.5rem, 9vw, 8rem); }
     mask-size: 400% 100%;
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
-    animation: heroNightSweep 34s ease-in-out infinite;
+    animation: heroNightSweep 26s ease-in-out infinite;
   }
 }
 
 @keyframes heroNightSweep {
-  0%, 26%   { -webkit-mask-position: 100% 0; mask-position: 100% 0; }  /* pleno día */
-  40%, 72%  { -webkit-mask-position: 30% 0;  mask-position: 30% 0; }   /* noche completa */
-  86%, 100% { -webkit-mask-position: -30% 0; mask-position: -30% 0; }  /* vuelve el día */
+  0%, 6%    { -webkit-mask-position: 100% 0; mask-position: 100% 0; }  /* día breve (~1.5s) */
+  28%, 55%  { -webkit-mask-position: 30% 0;  mask-position: 30% 0; }   /* noche completa */
+  77%, 100% { -webkit-mask-position: -30% 0; mask-position: -30% 0; }  /* vuelve el día */
 }
 
 /* Sky-only night tint: strong at the top, gone by ~70% height */
