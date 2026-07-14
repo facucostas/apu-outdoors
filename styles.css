@@ -225,8 +225,9 @@ section { position: relative; padding-block: clamp(4.5rem, 9vw, 8rem); }
 }
 
 @keyframes heroDronePan {
-  0%   { transform: scale(1.18) translate(4%, 0.5%); }
-  100% { transform: scale(1.24) translate(-4%, -0.8%); }
+  0%   { transform: scale(1.26) translate(6.5%, 0.8%); }
+  50%  { transform: scale(1.31) translate(0%, -0.4%); }
+  100% { transform: scale(1.38) translate(-6.5%, -1.4%); }
 }
 
 /* --- Night layer: only the SKY darkens; the mountain stays lit.
@@ -331,9 +332,9 @@ section { position: relative; padding-block: clamp(4.5rem, 9vw, 8rem); }
   background-size: 220px 220px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .hero-img { animation-duration: 60s; }
-}
+/* The drone pan is ambient, slow motion — intentionally NOT gated by
+   prefers-reduced-motion (Windows ships it ON by default; gating it
+   would freeze the hero for those users). */
 
 .hero-inner {
   position: relative; z-index: 2;
@@ -407,41 +408,63 @@ section { position: relative; padding-block: clamp(4.5rem, 9vw, 8rem); }
 .cat-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.1rem;
+  gap: 1rem;
   margin-top: 2.5rem;
 }
-@media (min-width: 720px) { .cat-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 540px)  { .cat-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1280px) { .cat-grid { grid-template-columns: repeat(4, 1fr); } }
 
 .cat-card {
   position: relative;
+  min-height: 380px;
   background: var(--bg-3);
   border: 1px solid var(--line);
   border-radius: 6px;
   overflow: hidden;
+  display: flex; align-items: flex-end;
   --rx: 0deg; --ry: 0deg;
   transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));
   transform-style: preserve-3d;
   transition: transform .55s var(--ease-soft), box-shadow .55s var(--ease-soft);
 }
+@media (min-width: 1280px) { .cat-card { min-height: 460px; } }
 .cat-card:hover {
   transition-duration: .15s;
   box-shadow: 0 30px 60px -20px rgba(0,0,0,.5), 0 0 0 1px rgba(201,138,63,.25);
 }
-.cat-card-img { aspect-ratio: 4/3; overflow: hidden; }
-.cat-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s var(--ease-soft), filter .55s; }
-.cat-card:hover .cat-card-img img { transform: scale(1.08); filter: saturate(1.15) brightness(1.03); }
-.cat-card-body { padding: 1.5rem 1.6rem 1.8rem; }
-.cat-card-body h3 { font-size: 1.4rem; margin-bottom: .5rem; color: var(--cream); }
-.cat-card-body p { color: var(--cream-3); font-size: .94rem; max-width: 34ch; }
-
-.cat-card-empty {
-  background: linear-gradient(160deg, var(--bg-3), var(--bg-2));
-  display: flex; align-items: center; justify-content: center;
-  min-height: 220px;
-  border-style: dashed;
+.cat-card-img { position: absolute; inset: 0; overflow: hidden; }
+.cat-card-img img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: saturate(.92) contrast(1.05);
+  transition: transform .9s var(--ease-soft), filter .6s;
 }
-.cat-card-body-center { text-align: center; padding: 2rem; }
-.cat-card-body-center h3 { color: var(--cream-3); }
+.cat-card:hover .cat-card-img img { transform: scale(1.09); filter: saturate(1.15) brightness(1.05) contrast(1.05); }
+.cat-card-overlay {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(9,13,22,.14) 0%, rgba(9,13,22,0) 35%, rgba(9,13,22,.9) 92%);
+}
+.cat-card-body {
+  position: relative;
+  padding: 1.4rem 1.5rem 1.6rem;
+  transform: translateY(6px);
+  transition: transform .5s var(--ease-soft);
+}
+.cat-card:hover .cat-card-body { transform: translateY(0); }
+.cat-num {
+  font-family: var(--mono); font-size: .68rem; letter-spacing: .18em;
+  color: var(--accent-2);
+}
+.cat-card-body h3 { font-size: 1.55rem; margin: .4rem 0 .45rem; color: var(--cream); }
+.cat-card-body p { color: var(--cream-2); font-size: .9rem; max-width: 30ch; }
+
+.cat-card-empty { background: linear-gradient(165deg, #14202e 0%, var(--bg-3) 55%, #0e1520 100%); }
+.cat-card-empty .cat-card-overlay { background: radial-gradient(90% 70% at 70% 20%, rgba(124,138,99,.16), transparent 70%); }
+.cat-chip {
+  display: inline-block; margin-top: .9rem;
+  font-family: var(--mono); font-size: .64rem; letter-spacing: .16em; text-transform: uppercase;
+  padding: .4rem .7rem; border: 1px solid var(--accent); border-radius: 3px;
+  color: var(--accent-2);
+}
 
 /* =============================================================
    10. Fabricación a pedido
@@ -461,12 +484,17 @@ section { position: relative; padding-block: clamp(4.5rem, 9vw, 8rem); }
 .fabricacion-figure img { width: 100%; aspect-ratio: 4/5; object-fit: cover; }
 
 /* Unified "product grade": evens out phone-shot photos so the whole
-   catalog reads consistent — slight contrast lift, warm-neutral cast,
-   soft inner vignette via the figure's shadow */
+   catalog reads consistent — cinematic contrast, warm cast, and a
+   slightly muted base that comes alive on hover */
 .fabricacion-figure img,
-.fabricacion-secondary img,
-.galeria-strip img {
-  filter: contrast(1.07) saturate(1.06) brightness(1.02);
+.fabricacion-secondary img {
+  filter: contrast(1.1) saturate(1.02) brightness(1.03) sepia(0.06);
+  transition: filter .6s var(--ease-out), transform .9s var(--ease-soft);
+}
+.fabricacion-figure:hover img,
+.fabricacion-secondary:hover img {
+  filter: contrast(1.08) saturate(1.14) brightness(1.05);
+  transform: scale(1.03);
 }
 .fabricacion-figure,
 .fabricacion-secondary {
@@ -521,8 +549,15 @@ section { position: relative; padding-block: clamp(4.5rem, 9vw, 8rem); }
 @media (min-width: 720px) { .galeria-strip { grid-template-columns: repeat(3, 1fr); } }
 
 .galeria-strip figure { position: relative; background: var(--bg-3); overflow: hidden; }
-.galeria-strip img { width: 100%; aspect-ratio: 3/4; object-fit: cover; transition: transform .9s var(--ease-soft); }
-.galeria-strip figure:hover img { transform: scale(1.06); }
+.galeria-strip img {
+  width: 100%; aspect-ratio: 3/4; object-fit: cover;
+  filter: saturate(.72) contrast(1.08) brightness(.96);
+  transition: transform .9s var(--ease-soft), filter .6s var(--ease-out);
+}
+.galeria-strip figure:hover img {
+  transform: scale(1.06);
+  filter: saturate(1.12) contrast(1.06) brightness(1.04);
+}
 .galeria-strip figcaption {
   position: absolute; left: 0; right: 0; bottom: 0;
   padding: 1.2rem;
@@ -615,6 +650,109 @@ section { position: relative; padding-block: clamp(4.5rem, 9vw, 8rem); }
 .footer-contact span { color: var(--cream-3); }
 
 .footer-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem; font-size: .8rem; color: var(--cream-3); }
+
+/* =============================================================
+   13b. Altímetro de scroll (desktop) — la página "sube" de Salta
+        capital (1.187 m) al Nevado de Cachi (6.380 m)
+   ============================================================= */
+.altimetro {
+  position: fixed; right: 1.6rem; top: 50%; z-index: 90;
+  transform: translateY(-50%);
+  display: none;
+  flex-direction: column; align-items: center; gap: .7rem;
+  font-family: var(--mono); font-size: .62rem; letter-spacing: .08em;
+  color: var(--cream-3); text-transform: uppercase; text-align: center;
+}
+@media (min-width: 1280px) { .altimetro { display: flex; } }
+.altimetro-bar {
+  position: relative; width: 2px; height: 34vh;
+  background: var(--line); border-radius: 2px; overflow: hidden;
+}
+.altimetro-fill {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 0%;
+  background: linear-gradient(0deg, var(--accent), var(--accent-2));
+  transition: height .15s linear;
+}
+.altimetro-value { color: var(--accent-2); font-size: .7rem; }
+.altimetro-peak { line-height: 1.5; }
+
+/* =============================================================
+   13c. Marquee de cumbres salteñas
+   ============================================================= */
+.marquee {
+  overflow: hidden; position: relative;
+  border-block: 1px solid var(--line);
+  padding-block: 1.1rem;
+  background: var(--bg);
+}
+.marquee::before, .marquee::after {
+  content: ""; position: absolute; top: 0; bottom: 0; width: 90px; z-index: 2; pointer-events: none;
+}
+.marquee::before { left: 0;  background: linear-gradient(90deg, var(--bg), transparent); }
+.marquee::after  { right: 0; background: linear-gradient(270deg, var(--bg), transparent); }
+.marquee-track {
+  display: inline-flex; align-items: center; gap: 2.6rem;
+  white-space: nowrap; will-change: transform;
+  animation: marqueeScroll 46s linear infinite;
+}
+.marquee-track span {
+  font-family: var(--mono); font-size: .78rem; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--cream-3);
+}
+.marquee-track span b { color: var(--accent-2); font-weight: 500; }
+.marquee-track i { color: var(--accent); font-style: normal; font-size: .6rem; }
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* =============================================================
+   13d. Proceso a pedido
+   ============================================================= */
+.proceso { background: var(--bg-2); }
+.proceso-steps {
+  display: grid; grid-template-columns: 1fr; gap: 2.2rem;
+  margin-top: 2.8rem;
+  counter-reset: paso;
+}
+@media (min-width: 720px)  { .proceso-steps { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1280px) { .proceso-steps { grid-template-columns: repeat(4, 1fr); } }
+.proceso-steps li {
+  position: relative;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--line);
+}
+.proceso-num {
+  font-family: var(--mono); font-size: .72rem; letter-spacing: .16em;
+  color: var(--accent);
+}
+.proceso-steps h3 {
+  font-size: 1.25rem; margin: .6rem 0 .5rem; color: var(--cream);
+}
+.proceso-steps p { color: var(--cream-3); font-size: .92rem; max-width: 30ch; }
+
+/* =============================================================
+   13e. Banner CTA
+   ============================================================= */
+.cta-banner {
+  position: relative; overflow: hidden; isolation: isolate;
+  text-align: center;
+  padding-block: clamp(5rem, 12vw, 9rem);
+}
+.cta-banner-bg {
+  position: absolute; inset: 0; z-index: -1;
+  background-image:
+    linear-gradient(180deg, rgba(9,13,22,.92) 0%, rgba(9,13,22,.72) 50%, rgba(9,13,22,.94) 100%),
+    url("assets/img/hero-nevado.jpg");
+  background-size: cover; background-position: 50% 32%;
+  filter: saturate(.9);
+}
+.cta-banner-title {
+  font-size: clamp(2rem, 5.4vw, 3.8rem);
+  color: var(--cream);
+  margin-block: 1rem 2rem;
+}
+.cta-banner-title em { font-style: normal; color: var(--accent-2); }
 
 /* =============================================================
    14. Responsive — mobile nav

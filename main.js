@@ -137,6 +137,28 @@
   }
 
   // ---------------------------------------------------------------
+  // Altímetro: scroll progress mapped to altitude — from Salta
+  // capital (1.187 m) up to Nevado de Cachi (6.380 m)
+  // ---------------------------------------------------------------
+  function initAltimetro() {
+    var root = $("[data-altimetro]");
+    if (!root) return;
+    var valueEl = $("[data-alt-value]", root);
+    var fillEl = $("[data-alt-fill]", root);
+    var BASE = 1187, PEAK = 6380;
+    function update() {
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      var p = max > 0 ? Math.min(1, Math.max(0, scrollY / max)) : 0;
+      var alt = Math.round(BASE + p * (PEAK - BASE));
+      if (valueEl) valueEl.textContent = alt.toLocaleString("es-AR");
+      if (fillEl) fillEl.style.height = (p * 100).toFixed(1) + "%";
+    }
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    update();
+  }
+
+  // ---------------------------------------------------------------
   // Contact form -> builds a WhatsApp deep link from the fields
   // ---------------------------------------------------------------
   function initContactForm() {
@@ -190,6 +212,7 @@
     safe(initSmoothAnchors, "initSmoothAnchors");
     safe(initReveals, "initReveals");
     safe(initTilt, "initTilt");
+    safe(initAltimetro, "initAltimetro");
     safe(initContactForm, "initContactForm");
 
     if (window.gsap && window.ScrollTrigger) {
